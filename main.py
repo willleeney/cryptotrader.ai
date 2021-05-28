@@ -1,3 +1,4 @@
+
 import random
 import pandas as pd
 
@@ -11,6 +12,7 @@ from tensortrade.oms.exchanges import Exchange
 from tensortrade.oms.services.execution.simulated import execute_order
 from tensortrade.oms.instruments import USD, BTC, ETH, LTC
 from tensortrade.agents import DQNAgent
+from tensortrade.env.default.renderers import PlotlyTradingChart, FileLogger
 
 
 def run():
@@ -20,7 +22,6 @@ def run():
 
     bitfinex = Exchange("bitfinex", service=execute_order)(
         Stream.source(list(bitfinex_btc['close']), dtype="float").rename("USD-BTC"),
-
     )
 
     portfolio = Portfolio(USD, [
@@ -54,9 +55,11 @@ def run():
         Stream.source(list(data["volume"]), dtype="float").rename("volume")
     ])
 
-    chart_renderer = default.renderers.MatplotlibTradingChart(
-        display=True  # show the chart on screen (default
-          # save the chart to an HTML file
+    chart_renderer = PlotlyTradingChart(
+        display=True,  # show the chart on screen (default)
+        height=800,  # affects both displayed and saved file height. None for 100% height.
+        save_format="html",  # save the chart to an HTML file
+        auto_open_html=True,  # open the saved HTML chart in a new browser tab
     )
 
     env = default.create(
@@ -65,12 +68,13 @@ def run():
         reward_scheme="risk-adjusted",
         feed=feed,
         renderer_feed=renderer_feed,
-        renderer=['screen-log'],
+        renderer='file-log',
         window_size=20
     )
 
     agent = DQNAgent(env)
-    agent.train(n_steps=24800, n_episodes=10, save_path="agents/", render_interval=100)
+    agent.train(n_steps=200, n_episodes=10, save_path="agents/", render_interval=100)
+    portfolio.performance.net_worth.plot()
 
 
     return

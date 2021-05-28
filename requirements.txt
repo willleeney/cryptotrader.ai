@@ -1,1 +1,2 @@
 trezor[ethereum,hidapi]
+dash
