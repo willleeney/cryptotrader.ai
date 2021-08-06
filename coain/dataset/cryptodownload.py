@@ -138,7 +138,7 @@ class CryptoDataDownload:
 
         df = pd.read_csv(self.url + filename, skiprows=1)
         df = df[::-1]
-        df = df.drop(['symbol', 'unix'], axis=1)
+        df = df.drop(['symbol', 'unix', 'tradecount'], axis=1)
         df.columns = [name.lower() for name in df.columns]
         df = df.set_index("date")
         df = df.reset_index()

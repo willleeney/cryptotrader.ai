@@ -78,6 +78,46 @@ register_env("TradingEnv", create_env)
 
 # trains the agent
 
+from ray.rllib.contrib.alpha_zero.models.custom_torch_models import DenseModel
+from ray.rllib.models.catalog import ModelCatalog
+ModelCatalog.register_custom_model("dense_model", DenseModel)
+
+tune.run(
+    "contrib/AlphaZero",
+    stop={
+        "episode_reward_mean": 300
+    },
+    max_failures=0,
+    config={
+        "env": "TradingEnv",
+        "env_config": {
+            "window_size": 25
+        },
+        "rollout_fragment_length": 50,
+        "train_batch_size": 500,
+        "sgd_minibatch_size": 64,
+        "lr": 1e-4,
+        "num_sgd_iter": 1,
+        "mcts_config": {
+            "puct_coefficient": 1.5,
+            "num_simulations": 100,
+            "temperature": 1.0,
+            "dirichlet_epsilon": 0.20,
+            "dirichlet_noise": 0.03,
+            "argmax_tree_policy": False,
+            "add_dirichlet_noise": True,
+        },
+        "ranked_rewards": {
+            "enable": True,
+        },
+        "model": {
+            "custom_model": "dense_model",
+        },
+    },
+    checkpoint_at_end=True,
+)
+
+'''
 analysis = tune.run(
     "PPO",
     stop={
@@ -112,6 +152,7 @@ analysis = tune.run(
     },
     checkpoint_at_end=True
 )
+'''
 
 # loads agent
 
