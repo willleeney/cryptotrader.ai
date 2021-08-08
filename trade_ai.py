@@ -1,6 +1,7 @@
 from coain.dataset.cryptodownload import CryptoDataDownload
 from coain.dataset.createfeatures import create_basic_features, rsi, macd
 from coain.renderer.history_plot import plot_df
+from coain.renderer.default import MyPlotlyTradingChart
 from coain.TheScheme.buysellhold import BuySellHold, PBR, SharpeRatio, MySimpleOrders
 
 from tensortrade.feed.core import Stream, DataFeed
@@ -41,7 +42,7 @@ def run():
     if view:
         plot_df(price_history, filename, quote_symbol, base_symbol)
 
-    price_history = price_history[-1000:]
+    price_history = price_history[-500:]
     if create:
         # creates trading features
         tidy_price_histroy = create_basic_features(price_history)
@@ -69,7 +70,7 @@ def run():
     )
 
     # create the instrument
-    USDT = Instrument("USDT", 4, "U.S. Dollar Tender")
+    USDT = Instrument("USDT", 3, "U.S. Dollar Tender")
     # define the starting amounts
     cash = Wallet(binance, 1000 * USDT)
     asset = Wallet(binance, 0 * ETH)
@@ -86,6 +87,10 @@ def run():
         asset=asset
     ).attach(reward_scheme)
 
+    #reward_scheme = SharpeRatio()
+
+    #action_scheme = MySimpleOrders(trade_sizes=2)
+
     renderer_feed = DataFeed([
         Stream.source(list(data["time"])).rename("date"),
         Stream.source(list(data["open"]), dtype="float").rename("open"),
@@ -101,14 +106,14 @@ def run():
         reward_scheme=reward_scheme,
         feed=feed,
         renderer_feed=renderer_feed,
-        renderer=default.renderers.PlotlyTradingChart(),
+        renderer=MyPlotlyTradingChart(),
         window_size=20
     )
 
-    env.observer.feed.next()
+    #env.observer.feed.next()
 
     agent = DQNAgent(env)
-    agent.train(n_steps=1000, n_episodes=10, render_interval=None, save_path="agents/")
+    agent.train(n_steps=500, n_episodes=10, render_interval=None, save_path="agents/")
 
 
 
