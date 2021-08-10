@@ -138,6 +138,7 @@ class SharpeRatio(TensorTradeRewardScheme):
         """
         return (np.mean(returns) - self._risk_free_rate + 1e-9) / (np.std(returns) + 1e-9)
 
+
     def get_reward(self, portfolio: 'Portfolio') -> float:
         """Computes the reward corresponding to the selected risk-adjusted return metric.
         Parameters
